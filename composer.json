@@ -1,0 +1,24 @@
+{
+    "name": "14code/ja-auth",
+    "description": "Just another Auth server",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "David Hoppe",
+            "email": "dh@14co.de"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "I4code\\JaAuth\\": "src/"
+        },
+        "files": ["src/functions.php"]
+    },
+    "prefer-stable": true,
+    "require": {
+        "league/oauth2-server": "^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    }
+}
