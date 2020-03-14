@@ -18,6 +18,7 @@ use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use function I4code\JaAuth\generateRandomCodeChallenge;
+use function I4code\JaAuth\generateState;
 
 class AuthorizationServerTest extends TestCase
 {
@@ -66,11 +67,17 @@ class AuthorizationServerTest extends TestCase
 
         $codeChallenge = generateRandomCodeChallenge();
 
+        $state = generateState();
+
+        // ToDo: implement/mock auth with different clients -> valid/invalid
+        // ToDo: implement/mock auth with different scopes -> valid/invalid
+
         $query = [
             'response_type' => 'code',
             'client_id' => 'lalala',
             'code_challenge' => $codeChallenge,
-            'code_challenge_method' => 'S256'
+            'code_challenge_method' => 'S256',
+            'state' => $state
         ];
         $uri = '/authorize';
 
@@ -82,7 +89,7 @@ class AuthorizationServerTest extends TestCase
         $this->assertInstanceOf(AuthorizationRequest::class, $authRequest);
 
         // verify user (login)
-        // ToDo: implement login
+        // ToDo: implement/mock login => valid/invalid
 
         // set user on authorization request
         $user = new UserEntity();
@@ -100,8 +107,20 @@ class AuthorizationServerTest extends TestCase
         $response = new Response();
         $response = $server->completeAuthorizationRequest($authRequest, $response);
 
-        $this->assertInstanceOf(ResponseInterface::class, $response);
 
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertNotEmpty($response->getHeader('Location'));
+
+        $location = $response->getHeader('Location');
+        $this->assertIsArray($location);
+        $parsedUrl = parse_url(current($location));
+        $responseQuery = [];
+        $this->assertArrayHasKey('query', $parsedUrl);
+        parse_str($parsedUrl['query'], $responseQuery);
+        $this->assertArrayHasKey('code', $responseQuery);
+        $this->assertNotEmpty($responseQuery['code']);
+        $this->assertArrayHasKey('state', $responseQuery);
+        $this->assertEquals($state, $responseQuery['state']);
     }
 
 }

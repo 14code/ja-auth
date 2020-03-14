@@ -7,11 +7,6 @@ use PHPUnit\Framework\TestCase;
 class ClientEntityTest extends TestCase
 {
 
-    public function testIsConfidential()
-    {
-
-    }
-
     public function testGetRedirectUri()
     {
         $client = new ClientEntity();
@@ -19,13 +14,4 @@ class ClientEntityTest extends TestCase
         $this->assertNotEmpty($client->getRedirectUri());
     }
 
-    public function testGetName()
-    {
-
-    }
-
-    public function testGetIdentifier()
-    {
-
-    }
 }
