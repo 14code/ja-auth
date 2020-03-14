@@ -18,7 +18,6 @@ class ClientRepository extends Repository implements ClientRepositoryInterface
 
     public function getClientEntity($clientIdentifier)
     {
-        // TODO: Implement getClientEntity() method.
         $client = new ClientEntity();
         return $client;
     }

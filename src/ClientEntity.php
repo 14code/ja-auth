@@ -12,4 +12,9 @@ class ClientEntity implements ClientEntityInterface
     use EntityTrait;
     use ClientTrait;
 
+    public function __construct()
+    {
+        $this->redirectUri = 'notempty';
+    }
+
 }
