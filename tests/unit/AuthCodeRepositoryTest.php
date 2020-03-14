@@ -11,6 +11,17 @@ class AuthCodeRepositoryTest extends TestCase
     {
         $repository = new \I4code\JaAuth\AuthCodeRepository();
         $this->assertInstanceOf(\League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface::class, $repository);
+        return $repository;
+    }
+
+    /**
+     * @param $repository
+     * @depends testConstruct
+     */
+    public function testGetNewAuthCode($repository)
+    {
+        $authCode = $repository->getNewAuthCode();
+        $this->assertInstanceOf(\League\OAuth2\Server\Entities\AuthCodeEntityInterface::class, $authCode);
     }
 
 }

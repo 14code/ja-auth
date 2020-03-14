@@ -10,10 +10,13 @@ use I4code\JaAuth\ClientEntityJsonGateway;
 use I4code\JaAuth\ClientRepository;
 use I4code\JaAuth\RefreshTokenRepository;
 use I4code\JaAuth\ScopeRepository;
+use I4code\JaAuth\UserEntity;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
+use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
 use function I4code\JaAuth\generateRandomCodeChallenge;
 
 class AuthorizationServerTest extends TestCase
@@ -77,6 +80,27 @@ class AuthorizationServerTest extends TestCase
 
         $authRequest = $server->validateAuthorizationRequest($request);
         $this->assertInstanceOf(AuthorizationRequest::class, $authRequest);
+
+        // verify user (login)
+        // ToDo: implement login
+
+        // set user on authorization request
+        $user = new UserEntity();
+        $authRequest->setUser($user);
+
+        // ToDo: test with false approve
+        // transform exception to http response
+        // } catch (OAuthServerException $exception) {
+        //        // All instances of OAuthServerException can be formatted into a HTTP response
+        //        return $exception->generateHttpResponse($response);
+        //$authRequest->setAuthorizationApproved(false);
+
+        $authRequest->setAuthorizationApproved(true);
+
+        $response = new Response();
+        $response = $server->completeAuthorizationRequest($authRequest, $response);
+
+        $this->assertInstanceOf(ResponseInterface::class, $response);
 
     }
 

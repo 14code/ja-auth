@@ -11,7 +11,8 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
 {
     public function getNewAuthCode()
     {
-        // TODO: Implement getNewAuthCode() method.
+        $authCode = new AuthCodeEntity();
+        return $authCode;
     }
 
     public function persistNewAuthCode(AuthCodeEntityInterface $authCodeEntity)
