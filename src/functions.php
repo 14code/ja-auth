@@ -12,3 +12,9 @@ function generateRandomCodeChallenge()
     $codeChallenge = rtrim(strtr(base64_encode($challengeBytes), "+/", "-_"), "=");
     return $codeChallenge;
 }
+
+function generateState()
+{
+    $state = uniqid();
+    return $state;
+}
