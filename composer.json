@@ -16,7 +16,8 @@
     },
     "prefer-stable": true,
     "require": {
-        "league/oauth2-server": "^8.0"
+        "league/oauth2-server": "^8.0",
+        "14code/ja-api": "^0.1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0"
