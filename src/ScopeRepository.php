@@ -11,7 +11,8 @@ class ScopeRepository implements ScopeRepositoryInterface
 {
     public function getScopeEntityByIdentifier($identifier)
     {
-        // TODO: Implement getScopeEntityByIdentifier() method.
+        $scope = new ScopeEntity();
+        return $scope;
     }
 
     public function finalizeScopes(array $scopes, $grantType, ClientEntityInterface $clientEntity, $userIdentifier = null)

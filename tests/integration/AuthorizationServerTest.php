@@ -71,12 +71,14 @@ class AuthorizationServerTest extends TestCase
 
         // ToDo: implement/mock auth with different clients -> valid/invalid
         // ToDo: implement/mock auth with different scopes -> valid/invalid
+        // ToDo: Need scope
 
         $query = [
             'response_type' => 'code',
             'client_id' => 'lalala',
             'code_challenge' => $codeChallenge,
             'code_challenge_method' => 'S256',
+            'scope' => 'user archive',
             'state' => $state
         ];
         $uri = '/authorize';
