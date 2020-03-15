@@ -17,7 +17,8 @@ class ScopeRepository implements ScopeRepositoryInterface
 
     public function finalizeScopes(array $scopes, $grantType, ClientEntityInterface $clientEntity, $userIdentifier = null)
     {
-        // TODO: Implement finalizeScopes() method.
+        $scopes = [];
+        return $scopes;
     }
 
 }

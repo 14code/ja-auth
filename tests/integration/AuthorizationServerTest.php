@@ -17,8 +17,11 @@ use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use function I4code\JaAuth\extractParameterFromUrl;
 use function I4code\JaAuth\generateRandomCodeChallenge;
+use function I4code\JaAuth\generateRandomCodeVerifier;
 use function I4code\JaAuth\generateState;
+use function I4code\JaAuth\getCodeFromUrl;
 
 class AuthorizationServerTest extends TestCase
 {
@@ -65,9 +68,13 @@ class AuthorizationServerTest extends TestCase
 
         $this->assertInstanceOf(AuthorizationServer::class, $server);
 
-        $codeChallenge = generateRandomCodeChallenge();
+        $codeVerifier = generateRandomCodeVerifier();
+        $codeChallenge = generateRandomCodeChallenge($codeVerifier);
 
         $state = generateState();
+        $clientId = uniqid();
+        $redirectUri = 'redirect/to/me';
+        $redirectUri = 'notempty';
 
         // ToDo: implement/mock auth with different clients -> valid/invalid
         // ToDo: implement/mock auth with different scopes -> valid/invalid
@@ -75,7 +82,8 @@ class AuthorizationServerTest extends TestCase
 
         $query = [
             'response_type' => 'code',
-            'client_id' => 'lalala',
+            'client_id' => $clientId,
+            //'redirect_uri' => $redirectUri, // should be allowed by client!!!I
             'code_challenge' => $codeChallenge,
             'code_challenge_method' => 'S256',
             'scope' => 'user archive',
@@ -113,16 +121,59 @@ class AuthorizationServerTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertNotEmpty($response->getHeader('Location'));
 
-        $location = $response->getHeader('Location');
-        $this->assertIsArray($location);
-        $parsedUrl = parse_url(current($location));
-        $responseQuery = [];
-        $this->assertArrayHasKey('query', $parsedUrl);
-        parse_str($parsedUrl['query'], $responseQuery);
-        $this->assertArrayHasKey('code', $responseQuery);
-        $this->assertNotEmpty($responseQuery['code']);
-        $this->assertArrayHasKey('state', $responseQuery);
-        $this->assertEquals($state, $responseQuery['state']);
+        $location = current($response->getHeader('Location'));
+
+        //error_log($location);
+
+        $this->assertEquals($state, extractParameterFromUrl('state', $location));
+
+        $code = extractParameterFromUrl('code', $location);
+        $this->assertNotEmpty($code);
+
+        $query = [
+            'grant_type' => 'authorization_code',
+            'client_id' => $clientId,
+            'code' => $code,
+            'redirect_uri' => $redirectUri, // should be allowed by client!!!I
+            'code_verifier' => $codeVerifier,
+            //'code_challenge' => $codeChallenge,
+            //'code_challenge_method' => 'S256',
+            //'scope' => 'user archive',
+            //'state' => $state
+        ];
+        /*
+    grant_type with the value of authorization_code
+    client_id with the client identifier
+    client_secret with the client secret
+    redirect_uri with the same redirect URI the user was redirect back to
+    code with the authorization code from the query string
+*/
+        $uri = '/access_token';
+
+        $serverRequestFactory = new ServerRequestFactory();
+        $request = $serverRequestFactory->createTestRequest('post', $uri);
+        //$body = $request->getBody();
+        //$body->write(json_encode($query));
+        //$request = $request->withBody($body);
+
+        // Use parsed body to mock requests!!!
+        $request = $request->withParsedBody($query);
+
+        $response = new Response();
+
+        // ToDo: Where is the refresh token?
+
+        $response = $server->respondToAccessTokenRequest($request, $response);
+        $body = $response->getBody();
+        $this->assertJson($body);
+        $data = json_decode($body);
+        $this->assertObjectHasAttribute('token_type', $data);
+        $this->assertEquals('Bearer', $data->token_type);
+        $this->assertObjectHasAttribute('expires_in', $data);
+        $this->assertEquals(3600, $data->expires_in);
+        $this->assertObjectHasAttribute('access_token', $data);
+        $this->assertNotEmpty($data->access_token);
+
     }
 
 }

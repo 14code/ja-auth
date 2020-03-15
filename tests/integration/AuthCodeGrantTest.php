@@ -15,6 +15,7 @@ use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
 use PHPUnit\Framework\TestCase;
 use function I4code\JaAuth\generateRandomCodeChallenge;
+use function I4code\JaAuth\generateRandomCodeVerifier;
 
 class AuthCodeGrantTest extends TestCase
 {
@@ -55,7 +56,8 @@ class AuthCodeGrantTest extends TestCase
 
         $this->assertInstanceOf(AuthCodeGrant::class, $grant);
 
-        $codeChallenge = generateRandomCodeChallenge();
+        $codeVerifier = generateRandomCodeVerifier();
+        $codeChallenge = generateRandomCodeChallenge($codeVerifier);
 
         $query = [
             'response_type' => 'code',

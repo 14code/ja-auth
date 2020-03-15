@@ -3,14 +3,19 @@ declare(strict_types=1);
 
 namespace I4code\JaAuth;
 
-function generateRandomCodeChallenge()
+function generateRandomCodeChallenge($verifier)
+{
+    $challengeBytes = hash("sha256", $verifier, true);
+    $codeChallenge = rtrim(strtr(base64_encode($challengeBytes), "+/", "-_"), "=");
+    return $codeChallenge;
+}
+
+function generateRandomCodeVerifier()
 {
     $random = pack('H*', bin2hex(openssl_random_pseudo_bytes(43)));
     $verifierBytes = random_bytes(64);
     $codeVerifier = rtrim(strtr(base64_encode($verifierBytes), "+/", "-_"), "=");
-    $challengeBytes = hash("sha256", $codeVerifier, true);
-    $codeChallenge = rtrim(strtr(base64_encode($challengeBytes), "+/", "-_"), "=");
-    return $codeChallenge;
+    return $codeVerifier;
 }
 
 function generateState()

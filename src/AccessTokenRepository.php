@@ -13,7 +13,8 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 {
     public function getNewToken(ClientEntityInterface $clientEntity, array $scopes, $userIdentifier = null)
     {
-        // TODO: Implement getNewToken() method.
+        $token = new AccessTokenEntity();
+        return $token;
     }
 
     public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity)
