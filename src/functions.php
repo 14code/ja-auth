@@ -18,3 +18,13 @@ function generateState()
     $state = uniqid();
     return $state;
 }
+
+function extractParameterFromUrl($parameter, $url)
+{
+    $parsedUrl = parse_url($url);
+    if (isset($parsedUrl['query'])) {
+        $responseQuery = [];
+        parse_str($parsedUrl['query'], $responseQuery);
+        return $responseQuery[$parameter];
+    }
+}
