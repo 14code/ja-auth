@@ -4,25 +4,46 @@ use PHPUnit\Framework\TestCase;
 
 class ClientRepositoryTest extends TestCase
 {
+    use \I4code\JaAuth\TestMocks\RepositoryTrait;
+
+    protected $uniqueClientId;
+    protected $repository;
+
+    public function setUp(): void
+    {
+        $this->createClientJsonRepository();
+
+        $clientData = current($this->clients);
+        $this->uniqueClientId = $clientData->id;
+
+        $gatewayMock = $this->createMock(\I4code\JaAuth\ClientEntityJsonGateway::class);
+        $gatewayMock->method('retrieveAll')->willReturn($this->clients);
+
+        $clientMock = $this->createMock(\I4code\JaAuth\ClientEntity::class);
+        $clientMock->method('getIdentifier')->willReturn($this->uniqueClientId);
+
+        $factoryMock = $this->createMock(\I4code\JaAuth\ClientEntityFactory::class);
+        $factoryMock->method('create')->willReturn($clientMock);
+
+        $this->repository = new \I4code\JaAuth\ClientRepository($gatewayMock, $factoryMock);
+    }
 
     public function testConstruct()
     {
-        $gatewayMock = $this->createMock(\I4code\JaAuth\ClientEntityJsonGateway::class);
-        $factoryMock = $this->createMock(\I4code\JaAuth\ClientEntityFactory::class);
-
-        $repository = new \I4code\JaAuth\ClientRepository($gatewayMock, $factoryMock);
-        $this->assertInstanceOf(\League\OAuth2\Server\Repositories\ClientRepositoryInterface::class, $repository);
-        return $repository;
+        $this->assertInstanceOf(\League\OAuth2\Server\Repositories\ClientRepositoryInterface::class, $this->repository);
     }
 
-    /**
-     * @depends testConstruct
-     */
-    public function testGetClientEntity($repository)
+    public function testFindAll()
     {
-        $clientId = 'testclient';
-        $client = $repository->getClientEntity($clientId);
+        $clients = $this->repository->findAll();
+        $this->assertCount(count($this->clients), $clients);
+    }
+
+    public function testGetClientEntity()
+    {
+        $client = $this->repository->getClientEntity($this->uniqueClientId);
         $this->assertInstanceOf(\League\OAuth2\Server\Entities\ClientEntityInterface::class, $client);
+        $this->assertEquals($this->uniqueClientId, $client->getIdentifier());
     }
 
 }

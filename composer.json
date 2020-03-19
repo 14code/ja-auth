@@ -10,7 +10,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "I4code\\JaAuth\\": "src/"
+            "I4code\\JaAuth\\": "src/",
+            "I4code\\JaAuth\\TestMocks\\": "tests/assets/mocks"
         },
         "files": ["src/functions.php"]
     },

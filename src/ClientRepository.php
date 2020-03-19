@@ -18,8 +18,12 @@ class ClientRepository extends Repository implements ClientRepositoryInterface
 
     public function getClientEntity($clientIdentifier)
     {
-        $client = new ClientEntity();
-        return $client;
+        $clients = $this->findAll();
+        foreach ($clients as $client) {
+            if ($clientIdentifier == $client->getIdentifier()) {
+                return $client;
+            }
+        }
     }
 
     public function validateClient($clientIdentifier, $clientSecret, $grantType)

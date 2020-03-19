@@ -2,6 +2,7 @@
 
 namespace integration;
 
+use I4code\JaApi\JsonEncoder;
 use I4code\JaApi\ServerRequestFactory;
 use I4code\JaAuth\AccessTokenRepository;
 use I4code\JaAuth\AuthCodeRepository;
@@ -19,6 +20,12 @@ use function I4code\JaAuth\generateRandomCodeVerifier;
 
 class AuthCodeGrantTest extends TestCase
 {
+    use \I4code\JaAuth\TestMocks\RepositoryTrait;
+
+    public function setUp(): void
+    {
+        $this->createClientJsonRepository();
+    }
 
     public function testAuthorize()
     {
@@ -28,7 +35,8 @@ class AuthCodeGrantTest extends TestCase
         $encryptionKey = file_get_contents($keyDir . '/encryption.key');
 
 // Init our repositories
-        $clientGateway = new ClientEntityJsonGateway();
+        $encoder = new JsonEncoder();
+        $clientGateway = new ClientEntityJsonGateway($this->file, $encoder);
         $clientFactory = new ClientEntityFactory();
         $clientRepository = new ClientRepository($clientGateway, $clientFactory); // instance of ClientRepositoryInterface
 
@@ -59,9 +67,12 @@ class AuthCodeGrantTest extends TestCase
         $codeVerifier = generateRandomCodeVerifier();
         $codeChallenge = generateRandomCodeChallenge($codeVerifier);
 
+        $clientData = current($this->clients);
+        $clientId = $clientData->id;
+
         $query = [
             'response_type' => 'code',
-            'client_id' => 'lalala',
+            'client_id' => $clientId,
             'code_challenge' => $codeChallenge,
             'code_challenge_method' => 'S256'
         ];

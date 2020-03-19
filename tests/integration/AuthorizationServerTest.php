@@ -2,6 +2,7 @@
 
 namespace integration;
 
+use I4code\JaApi\JsonEncoder;
 use I4code\JaApi\ServerRequestFactory;
 use I4code\JaAuth\AccessTokenRepository;
 use I4code\JaAuth\AuthCodeRepository;
@@ -25,6 +26,12 @@ use function I4code\JaAuth\getCodeFromUrl;
 
 class AuthorizationServerTest extends TestCase
 {
+    use \I4code\JaAuth\TestMocks\RepositoryTrait;
+
+    public function setUp(): void
+    {
+        $this->createClientJsonRepository();
+    }
 
     public function testAuthorize()
     {
@@ -34,7 +41,8 @@ class AuthorizationServerTest extends TestCase
         $encryptionKey = file_get_contents($keyDir . '/encryption.key');
 
 // Init our repositories
-        $clientGateway = new ClientEntityJsonGateway();
+        $encoder = new JsonEncoder();
+        $clientGateway = new ClientEntityJsonGateway($this->file, $encoder);
         $clientFactory = new ClientEntityFactory();
         $clientRepository = new ClientRepository($clientGateway, $clientFactory); // instance of ClientRepositoryInterface
 
@@ -72,7 +80,10 @@ class AuthorizationServerTest extends TestCase
         $codeChallenge = generateRandomCodeChallenge($codeVerifier);
 
         $state = generateState();
-        $clientId = uniqid();
+
+        $clientData = current($this->clients);
+        $clientId = $clientData->id;
+
         $redirectUri = 'redirect/to/me';
         $redirectUri = 'notempty';
 

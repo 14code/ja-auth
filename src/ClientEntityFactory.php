@@ -12,7 +12,24 @@ class ClientEntityFactory implements Factory
 
     public function createFromArray(array $data)
     {
-        // TODO: Implement createFromArray() method.
+        return $this->createFromObject((object) $data);
+    }
+
+    public function create($data = null)
+    {
+        if (is_array($data)) {
+            return $this->createFromArray($data);
+        }
+        if (is_object($data)) {
+            return $this->createFromObject($data);
+        }
+    }
+
+    public function createFromObject(object $data)
+    {
+        $client = new ClientEntity();
+        $client->setIdentifier($data->id);
+        return $client;
     }
 
 }

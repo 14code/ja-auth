@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "14code/ja-api",
-            "version": "v0.1.1",
+            "version": "v0.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/14code/ja-api.git",
-                "reference": "3f4695cf9dc4a2c8419cbde7d7ffe95cb893a8e5"
+                "reference": "4c45c33dcb419387c16b90084cca9dbf7d48db88"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/14code/ja-api/zipball/3f4695cf9dc4a2c8419cbde7d7ffe95cb893a8e5",
-                "reference": "3f4695cf9dc4a2c8419cbde7d7ffe95cb893a8e5",
+                "url": "https://api.github.com/repos/14code/ja-api/zipball/4c45c33dcb419387c16b90084cca9dbf7d48db88",
+                "reference": "4c45c33dcb419387c16b90084cca9dbf7d48db88",
                 "shasum": ""
             },
             "require": {
@@ -48,7 +48,7 @@
                 }
             ],
             "description": "Just another API",
-            "time": "2019-12-19T18:46:20+00:00"
+            "time": "2020-03-19T08:25:42+00:00"
         },
         {
             "name": "defuse/php-encryption",
