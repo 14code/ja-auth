@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 
 class ClientRepositoryTest extends TestCase
 {
-    use \I4code\JaAuth\TestMocks\RepositoryTrait;
+    use \I4code\JaAuth\TestMocks\RepositoryMockTrait;
 
     protected $uniqueClientId;
     protected $repository;

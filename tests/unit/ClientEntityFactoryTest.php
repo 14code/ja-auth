@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class ClientEntityFactoryTest extends TestCase
 {
-    use \I4code\JaAuth\TestMocks\RepositoryTrait;
+    use \I4code\JaAuth\TestMocks\RepositoryMockTrait;
 
     public function setUp(): void
     {

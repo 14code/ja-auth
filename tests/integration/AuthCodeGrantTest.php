@@ -10,6 +10,8 @@ use I4code\JaAuth\ClientEntityFactory;
 use I4code\JaAuth\ClientEntityJsonGateway;
 use I4code\JaAuth\ClientRepository;
 use I4code\JaAuth\RefreshTokenRepository;
+use I4code\JaAuth\ScopeEntityFactory;
+use I4code\JaAuth\ScopeEntityJsonGateway;
 use I4code\JaAuth\ScopeRepository;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
@@ -20,11 +22,12 @@ use function I4code\JaAuth\generateRandomCodeVerifier;
 
 class AuthCodeGrantTest extends TestCase
 {
-    use \I4code\JaAuth\TestMocks\RepositoryTrait;
+    use \I4code\JaAuth\TestMocks\RepositoryMockTrait;
 
     public function setUp(): void
     {
         $this->createClientJsonRepository();
+        $this->createScopeJsonRepository();
     }
 
     public function testAuthorize()
@@ -36,11 +39,15 @@ class AuthCodeGrantTest extends TestCase
 
 // Init our repositories
         $encoder = new JsonEncoder();
+
         $clientGateway = new ClientEntityJsonGateway($this->file, $encoder);
         $clientFactory = new ClientEntityFactory();
         $clientRepository = new ClientRepository($clientGateway, $clientFactory); // instance of ClientRepositoryInterface
 
-        $scopeRepository = new ScopeRepository(); // instance of ScopeRepositoryInterface
+        $scopeGateway = new ScopeEntityJsonGateway($this->scopeJsonFile, $encoder);
+        $scopeFactory = new ScopeEntityFactory();
+        $scopeRepository = new ScopeRepository($scopeGateway, $scopeFactory); // instance of ScopeRepositoryInterface
+
         $accessTokenRepository = new AccessTokenRepository(); // instance of AccessTokenRepositoryInterface
         $authCodeRepository = new AuthCodeRepository(); // instance of AuthCodeRepositoryInterface
         $refreshTokenRepository = new RefreshTokenRepository(); // instance of RefreshTokenRepositoryInterface
