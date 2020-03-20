@@ -46,7 +46,7 @@ class AuthorizationServerTest extends TestCase
 // Init our repositories
         $encoder = new JsonEncoder();
 
-        $clientGateway = new ClientEntityJsonGateway($this->file, $encoder);
+        $clientGateway = new ClientEntityJsonGateway($this->clientJsonFile, $encoder);
         $clientFactory = new ClientEntityFactory();
         $clientRepository = new ClientRepository($clientGateway, $clientFactory); // instance of ClientRepositoryInterface
 
@@ -88,9 +88,6 @@ class AuthorizationServerTest extends TestCase
 
         $state = generateState();
 
-        $clientData = current($this->clients);
-        $clientId = $clientData->id;
-
         $redirectUri = 'redirect/to/me';
         $redirectUri = 'notempty';
 
@@ -100,7 +97,7 @@ class AuthorizationServerTest extends TestCase
 
         $query = [
             'response_type' => 'code',
-            'client_id' => $clientId,
+            'client_id' => $this->uniqueClientId,
             //'redirect_uri' => $redirectUri, // should be allowed by client!!!I
             'code_challenge' => $codeChallenge,
             'code_challenge_method' => 'S256',
@@ -150,7 +147,7 @@ class AuthorizationServerTest extends TestCase
 
         $query = [
             'grant_type' => 'authorization_code',
-            'client_id' => $clientId,
+            'client_id' => $this->uniqueClientId,
             'code' => $code,
             'redirect_uri' => $redirectUri, // should be allowed by client!!!I
             'code_verifier' => $codeVerifier,

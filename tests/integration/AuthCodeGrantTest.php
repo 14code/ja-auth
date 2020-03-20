@@ -40,7 +40,7 @@ class AuthCodeGrantTest extends TestCase
 // Init our repositories
         $encoder = new JsonEncoder();
 
-        $clientGateway = new ClientEntityJsonGateway($this->file, $encoder);
+        $clientGateway = new ClientEntityJsonGateway($this->clientJsonFile, $encoder);
         $clientFactory = new ClientEntityFactory();
         $clientRepository = new ClientRepository($clientGateway, $clientFactory); // instance of ClientRepositoryInterface
 
@@ -74,12 +74,9 @@ class AuthCodeGrantTest extends TestCase
         $codeVerifier = generateRandomCodeVerifier();
         $codeChallenge = generateRandomCodeChallenge($codeVerifier);
 
-        $clientData = current($this->clients);
-        $clientId = $clientData->id;
-
         $query = [
             'response_type' => 'code',
-            'client_id' => $clientId,
+            'client_id' => $this->uniqueClientId,
             'code_challenge' => $codeChallenge,
             'code_challenge_method' => 'S256'
         ];

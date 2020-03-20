@@ -17,7 +17,7 @@ class ClientEntityJsonGatewayTest extends TestCase
     public function testConstruct()
     {
         $encoder = new \I4code\JaApi\JsonEncoder();
-        $gateway = new ClientEntityJsonGateway($this->file, $encoder);
+        $gateway = new ClientEntityJsonGateway($this->clientJsonFile, $encoder);
         $this->assertInstanceOf(ClientEntityJsonGateway::class, $gateway);
         return $gateway;
     }

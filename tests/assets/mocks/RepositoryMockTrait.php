@@ -7,7 +7,8 @@ namespace I4code\JaAuth\TestMocks;
 trait RepositoryMockTrait
 {
     protected $clients;
-    protected $file;
+    protected $clientJsonFile;
+    protected $uniqueClientId;
     protected $scopes;
     protected $scopeJsonFile;
     protected $uniqueScopeId;
@@ -15,13 +16,20 @@ trait RepositoryMockTrait
 
     public function createClientJsonRepository(): void
     {
-        $this->file = 'tests/assets/data/clients.json';
+        $this->uniqueClientId = uniqid('client');
+        $this->clientJsonFile = 'tests/assets/data/clients.json';
         $this->clients = [
             (object) [
-                'id' => uniqid()
+                'id' => $this->uniqueClientId
+            ],
+            (object) [
+                'id' => uniqid('client')
+            ],
+            (object) [
+                'id' => uniqid('client')
             ]
         ];
-        file_put_contents($this->file, json_encode($this->clients));
+        file_put_contents($this->clientJsonFile, json_encode($this->clients));
     }
 
     public function createScopeJsonRepository(): void
