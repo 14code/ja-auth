@@ -11,11 +11,6 @@ use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
 class ClientRepository extends Repository implements ClientRepositoryInterface
 {
 
-    public function __construct(Gateway $gateway, Factory $factory)
-    {
-        parent::__construct($gateway, $factory);
-    }
-
     public function getClientEntity($clientIdentifier)
     {
         $clients = $this->findAll();

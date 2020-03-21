@@ -1,13 +1,11 @@
 <?php
 declare(strict_types=1);
 
-
 namespace I4code\JaAuth;
-
 
 use I4code\JaApi\Factory;
 
-abstract class AbstractEntityFactory implements Factory
+abstract class AbstractFactory implements Factory
 {
 
     public function createFromArray(array $data)

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace I4code\JaAuth;
 
 
-class ClientEntityFactory extends AbstractEntityFactory
+class ClientEntityFactory extends AbstractFactory
 {
 
     public function createFromObject(object $data)
