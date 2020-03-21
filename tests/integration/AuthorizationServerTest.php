@@ -7,11 +7,10 @@ use I4code\JaApi\ServerRequestFactory;
 use I4code\JaAuth\AccessTokenRepository;
 use I4code\JaAuth\AuthCodeRepository;
 use I4code\JaAuth\ClientEntityFactory;
-use I4code\JaAuth\ClientEntityJsonGateway;
 use I4code\JaAuth\ClientRepository;
+use I4code\JaAuth\JsonGateway;
 use I4code\JaAuth\RefreshTokenRepository;
 use I4code\JaAuth\ScopeEntityFactory;
-use I4code\JaAuth\ScopeEntityJsonGateway;
 use I4code\JaAuth\ScopeRepository;
 use I4code\JaAuth\UserEntity;
 use League\OAuth2\Server\AuthorizationServer;
@@ -24,7 +23,6 @@ use function I4code\JaAuth\extractParameterFromUrl;
 use function I4code\JaAuth\generateRandomCodeChallenge;
 use function I4code\JaAuth\generateRandomCodeVerifier;
 use function I4code\JaAuth\generateState;
-use function I4code\JaAuth\getCodeFromUrl;
 
 class AuthorizationServerTest extends TestCase
 {
@@ -46,11 +44,11 @@ class AuthorizationServerTest extends TestCase
 // Init our repositories
         $encoder = new JsonEncoder();
 
-        $clientGateway = new ClientEntityJsonGateway($this->clientJsonFile, $encoder);
+        $clientGateway = new JsonGateway($this->clientJsonFile, $encoder);
         $clientFactory = new ClientEntityFactory();
         $clientRepository = new ClientRepository($clientGateway, $clientFactory); // instance of ClientRepositoryInterface
 
-        $scopeGateway = new ScopeEntityJsonGateway($this->scopeJsonFile, $encoder);
+        $scopeGateway = new JsonGateway($this->scopeJsonFile, $encoder);
         $scopeFactory = new ScopeEntityFactory();
         $scopeRepository = new ScopeRepository($scopeGateway, $scopeFactory); // instance of ScopeRepositoryInterface
 

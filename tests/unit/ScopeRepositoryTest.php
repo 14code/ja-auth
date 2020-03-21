@@ -13,7 +13,7 @@ class ScopeRepositoryTest extends TestCase
     {
         $this->createScopeJsonRepository();
 
-        $gatewayMock = $this->createMock(\I4code\JaAuth\ScopeEntityJsonGateway::class);
+        $gatewayMock = $this->createMock(\I4code\JaAuth\JsonGateway::class);
         $gatewayMock->method('retrieveAll')->willReturn($this->scopes);
 
         $scopeMock = $this->createMock(\I4code\JaAuth\ScopeEntity::class);

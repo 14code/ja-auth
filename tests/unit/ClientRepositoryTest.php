@@ -13,7 +13,7 @@ class ClientRepositoryTest extends TestCase
     {
         $this->createClientJsonRepository();
 
-        $gatewayMock = $this->createMock(\I4code\JaAuth\ClientEntityJsonGateway::class);
+        $gatewayMock = $this->createMock(\I4code\JaAuth\JsonGateway::class);
         $gatewayMock->method('retrieveAll')->willReturn($this->clients);
 
         $clientMock = $this->createMock(\I4code\JaAuth\ClientEntity::class);
