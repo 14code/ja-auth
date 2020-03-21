@@ -21,6 +21,7 @@
         "14code/ja-api": "^0.1.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.0"
+        "phpunit/phpunit": "^9.0",
+        "fzaninotto/faker": "^1.9"
     }
 }

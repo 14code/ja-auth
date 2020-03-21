@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace I4code\JaAuth;
 
+use I4code\JaApi\Repository;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\UserEntityInterface;
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
 
-class UserRepository implements UserRepositoryInterface
+class UserRepository extends Repository implements UserRepositoryInterface
 {
     use EntityTrait;
 
@@ -23,10 +24,17 @@ class UserRepository implements UserRepositoryInterface
      * - You can use the grant type to determine if the user is permitted to use the grant type.
      * - You can use the client entity to determine to if the user is permitted to use the client.
      */
-    public function getUserEntityByUserCredentials($username, $password, $grantType, ClientEntityInterface $clientEntity)
+    public function getUserEntityByUserCredentials($login, $password, $grantType, ClientEntityInterface $clientEntity)
     {
-        $user = new UserEntity();
-        return $user;
+        $users = $this->findAll();
+        foreach ($users as $user) {
+            if (($login == $user->getLogin()) && ($password == $user->getPassword())) {
+                return $user;
+            }
+            if (($login == $user->getEmail()) && ($password == $user->getPassword())) {
+                return $user;
+            }
+        }
     }
 
 }

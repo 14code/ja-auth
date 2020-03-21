@@ -13,6 +13,8 @@ use I4code\JaAuth\RefreshTokenRepository;
 use I4code\JaAuth\ScopeEntityFactory;
 use I4code\JaAuth\ScopeRepository;
 use I4code\JaAuth\UserEntity;
+use I4code\JaAuth\UserEntityFactory;
+use I4code\JaAuth\UserRepository;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
@@ -26,17 +28,31 @@ use function I4code\JaAuth\generateState;
 
 class AuthorizationServerTest extends TestCase
 {
+    protected $grantType = 'authorization_code';
+
+    protected $server;
+    protected $redirectUri;
+    protected $codeVerifier;
+    protected $codeChallenge;
+    protected $state;
+
+    protected $userRepository;
+
     use \I4code\JaAuth\TestMocks\RepositoryMockTrait;
 
     public function setUp(): void
     {
         $this->createClientJsonRepository();
         $this->createScopeJsonRepository();
-    }
+        $this->createUserJsonRepository();
 
-    public function testAuthorize()
-    {
+        $this->codeVerifier = generateRandomCodeVerifier();
+        $this->codeChallenge = generateRandomCodeChallenge($this->codeVerifier);
+        $this->state = generateState();
+
         $keyDir = __DIR__ . '/../../.keys';
+
+        $this->redirectUri = 'notempty';
 
         $privateKey = $keyDir . '/private.key';
         $encryptionKey = file_get_contents($keyDir . '/encryption.key');
@@ -52,12 +68,16 @@ class AuthorizationServerTest extends TestCase
         $scopeFactory = new ScopeEntityFactory();
         $scopeRepository = new ScopeRepository($scopeGateway, $scopeFactory); // instance of ScopeRepositoryInterface
 
+        $userGateway = new JsonGateway($this->userJsonFile, $encoder);
+        $userFactory = new UserEntityFactory();
+        $this->userRepository = new UserRepository($userGateway, $userFactory); // instance of UserRepositoryInterface
+
         $accessTokenRepository = new AccessTokenRepository(); // instance of AccessTokenRepositoryInterface
         $authCodeRepository = new AuthCodeRepository(); // instance of AuthCodeRepositoryInterface
         $refreshTokenRepository = new RefreshTokenRepository(); // instance of RefreshTokenRepositoryInterface
 
 // Setup the authorization server
-        $server = new \League\OAuth2\Server\AuthorizationServer(
+        $this->server = new \League\OAuth2\Server\AuthorizationServer(
             $clientRepository,
             $accessTokenRepository,
             $scopeRepository,
@@ -74,20 +94,28 @@ class AuthorizationServerTest extends TestCase
         $grant->setRefreshTokenTTL(new \DateInterval('P1M')); // refresh tokens will expire after 1 month
 
 // Enable the authentication code grant on the server
-        $server->enableGrantType(
+        $this->server->enableGrantType(
             $grant,
             new \DateInterval('PT1H') // access tokens will expire after 1 hour
         );
+    }
 
-        $this->assertInstanceOf(AuthorizationServer::class, $server);
+    public function testLogin()
+    {
+        $login = 'user';
+        $password = 'password';
 
-        $codeVerifier = generateRandomCodeVerifier();
-        $codeChallenge = generateRandomCodeChallenge($codeVerifier);
+        $query = [
+            'login' => $login,
+            'password' => $password
+        ];
 
-        $state = generateState();
+        $this->assertTrue(true);
+    }
 
-        $redirectUri = 'redirect/to/me';
-        $redirectUri = 'notempty';
+    public function testAuthorizePartOne()
+    {
+        $this->assertInstanceOf(AuthorizationServer::class, $this->server);
 
         // ToDo: implement/mock auth with different clients -> valid/invalid
         // ToDo: implement/mock auth with different scopes -> valid/invalid
@@ -96,11 +124,11 @@ class AuthorizationServerTest extends TestCase
         $query = [
             'response_type' => 'code',
             'client_id' => $this->uniqueClientId,
-            //'redirect_uri' => $redirectUri, // should be allowed by client!!!I
-            'code_challenge' => $codeChallenge,
+            'redirect_uri' => $this->redirectUri, // should be allowed by client!!!I
+            'code_challenge' => $this->codeChallenge,
             'code_challenge_method' => 'S256',
             'scope' => 'user archive',
-            'state' => $state
+            'state' => $this->state
         ];
         $uri = '/authorize';
 
@@ -108,27 +136,34 @@ class AuthorizationServerTest extends TestCase
         $request = $serverRequestFactory->createTestRequest('get', $uri);
         $request = $request->withQueryParams($query);
 
-        $authRequest = $server->validateAuthorizationRequest($request);
+        // Validate the HTTP request and return an AuthorizationRequest object.
+        $authRequest = $this->server->validateAuthorizationRequest($request);
         $this->assertInstanceOf(AuthorizationRequest::class, $authRequest);
 
         // verify user (login)
-        // ToDo: implement/mock login => valid/invalid
+        // ToDo: implement/mock login and persist in session => valid/invalid
+
+        // The auth request object can be serialized and saved into a user's session.
+        // You will probably want to redirect the user at this point to a login endpoint.
 
         // set user on authorization request
-        $user = new UserEntity();
+        $client = $authRequest->getClient();
+        $user = $this->userRepository->getUserEntityByUserCredentials($this->uniqueUser->login, $this->uniqueUser->password, $this->grantType, $client);
         $authRequest->setUser($user);
 
         // ToDo: test with false approve
+        // try {
         // transform exception to http response
         // } catch (OAuthServerException $exception) {
         //        // All instances of OAuthServerException can be formatted into a HTTP response
         //        return $exception->generateHttpResponse($response);
+        // }
         //$authRequest->setAuthorizationApproved(false);
 
         $authRequest->setAuthorizationApproved(true);
 
         $response = new Response();
-        $response = $server->completeAuthorizationRequest($authRequest, $response);
+        $response = $this->server->completeAuthorizationRequest($authRequest, $response);
 
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
@@ -138,17 +173,22 @@ class AuthorizationServerTest extends TestCase
 
         //error_log($location);
 
-        $this->assertEquals($state, extractParameterFromUrl('state', $location));
+        $this->assertEquals($this->state, extractParameterFromUrl('state', $location));
 
         $code = extractParameterFromUrl('code', $location);
         $this->assertNotEmpty($code);
 
+        $this->authorizePartTwo($code);
+    }
+
+    public function authorizePartTwo($code)
+    {
         $query = [
             'grant_type' => 'authorization_code',
             'client_id' => $this->uniqueClientId,
             'code' => $code,
-            'redirect_uri' => $redirectUri, // should be allowed by client!!!I
-            'code_verifier' => $codeVerifier,
+            'redirect_uri' => $this->redirectUri, // should be allowed by client!!!I
+            'code_verifier' => $this->codeVerifier,
             //'code_challenge' => $codeChallenge,
             //'code_challenge_method' => 'S256',
             //'scope' => 'user archive',
@@ -176,7 +216,7 @@ class AuthorizationServerTest extends TestCase
 
         // ToDo: Where is the refresh token?
 
-        $response = $server->respondToAccessTokenRequest($request, $response);
+        $response = $this->server->respondToAccessTokenRequest($request, $response);
         $body = $response->getBody();
         $this->assertJson($body);
         $data = json_decode($body);
