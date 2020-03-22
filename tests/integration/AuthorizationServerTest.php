@@ -12,10 +12,13 @@ use I4code\JaAuth\JsonGateway;
 use I4code\JaAuth\RefreshTokenRepository;
 use I4code\JaAuth\ScopeEntityFactory;
 use I4code\JaAuth\ScopeRepository;
+use I4code\JaAuth\Session;
 use I4code\JaAuth\UserEntity;
 use I4code\JaAuth\UserEntityFactory;
 use I4code\JaAuth\UserRepository;
 use League\OAuth2\Server\AuthorizationServer;
+use League\OAuth2\Server\Entities\UserEntityInterface;
+use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
 use Nyholm\Psr7\Response;
@@ -37,6 +40,7 @@ class AuthorizationServerTest extends TestCase
     protected $state;
 
     protected $userRepository;
+    protected $session;
 
     use \I4code\JaAuth\TestMocks\RepositoryMockTrait;
 
@@ -76,6 +80,8 @@ class AuthorizationServerTest extends TestCase
         $authCodeRepository = new AuthCodeRepository(); // instance of AuthCodeRepositoryInterface
         $refreshTokenRepository = new RefreshTokenRepository(); // instance of RefreshTokenRepositoryInterface
 
+        $this->session = new Session();
+
 // Setup the authorization server
         $this->server = new \League\OAuth2\Server\AuthorizationServer(
             $clientRepository,
@@ -100,27 +106,8 @@ class AuthorizationServerTest extends TestCase
         );
     }
 
-    public function testLogin()
+    public function generateAuthorizationRequest()
     {
-        $login = 'user';
-        $password = 'password';
-
-        $query = [
-            'login' => $login,
-            'password' => $password
-        ];
-
-        $this->assertTrue(true);
-    }
-
-    public function testAuthorizePartOne()
-    {
-        $this->assertInstanceOf(AuthorizationServer::class, $this->server);
-
-        // ToDo: implement/mock auth with different clients -> valid/invalid
-        // ToDo: implement/mock auth with different scopes -> valid/invalid
-        // ToDo: Need scope
-
         $query = [
             'response_type' => 'code',
             'client_id' => $this->uniqueClientId,
@@ -136,31 +123,72 @@ class AuthorizationServerTest extends TestCase
         $request = $serverRequestFactory->createTestRequest('get', $uri);
         $request = $request->withQueryParams($query);
 
-        // Validate the HTTP request and return an AuthorizationRequest object.
+        return $request;
+    }
+
+    public function testServerInstance()
+    {
+        $this->assertInstanceOf(AuthorizationServer::class, $this->server);
+    }
+
+    public function testLogin()
+    {
+        $login = 'user';
+        $password = 'password';
+
+        $query = [
+            'login' => $login,
+            'password' => $password
+        ];
+
+        $this->assertTrue(true);
+    }
+
+    public function testAuthorizationNoUser()
+    {
+        //$this->expectException(OAuthServerException::class);
+
+        $request = $this->generateAuthorizationRequest();
+
         $authRequest = $this->server->validateAuthorizationRequest($request);
         $this->assertInstanceOf(AuthorizationRequest::class, $authRequest);
 
-        // verify user (login)
-        // ToDo: implement/mock login and persist in session => valid/invalid
+        $authRequest->setUser($this->session->getUser());
+        $authRequest->setAuthorizationApproved($this->session->userIsApproved());
 
-        // The auth request object can be serialized and saved into a user's session.
-        // You will probably want to redirect the user at this point to a login endpoint.
+        $response = null;
+        try {
+            $response = new Response();
+            $this->server->completeAuthorizationRequest($authRequest, $response);
+        }
+        catch (OAuthServerException $e) {
+            $return_to = $request->getUri() . '?' . http_build_query($request->getQueryParams());
+            $redirectUri = '/login?client_id=' . $authRequest->getClient()->getIdentifier()
+                . '&return_to=' . urlencode($return_to);
+            $response = $e->generateHttpResponse($response);
+            $response = $response->withHeader('Location', $redirectUri);
+        }
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertEquals(302, $response->getStatusCode());
+        //error_log(print_r($response->getHeaders(), true));
+    }
 
-        // set user on authorization request
+    public function testAuthorizePartOne()
+    {
+        $request = $this->generateAuthorizationRequest();
+
+        $authRequest = $this->server->validateAuthorizationRequest($request);
+        $this->assertInstanceOf(AuthorizationRequest::class, $authRequest);
+
+        // ToDo: test with logged in user without permissions
+        // Mocking login of session user
         $client = $authRequest->getClient();
         $user = $this->userRepository->getUserEntityByUserCredentials($this->uniqueUser->login, $this->uniqueUser->password, $this->grantType, $client);
-        $authRequest->setUser($user);
+        $this->session->setUser($user);
 
-        // ToDo: test with false approve
-        // try {
-        // transform exception to http response
-        // } catch (OAuthServerException $exception) {
-        //        // All instances of OAuthServerException can be formatted into a HTTP response
-        //        return $exception->generateHttpResponse($response);
-        // }
-        //$authRequest->setAuthorizationApproved(false);
-
-        $authRequest->setAuthorizationApproved(true);
+        // set user on auth request and approve
+        $authRequest->setUser($this->session->getUser());
+        $authRequest->setAuthorizationApproved($this->session->userIsApproved());
 
         $response = new Response();
         $response = $this->server->completeAuthorizationRequest($authRequest, $response);
