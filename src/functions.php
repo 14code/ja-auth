@@ -30,6 +30,8 @@ function extractParameterFromUrl($parameter, $url)
     if (isset($parsedUrl['query'])) {
         $responseQuery = [];
         parse_str($parsedUrl['query'], $responseQuery);
-        return $responseQuery[$parameter];
+        if (isset($responseQuery[$parameter])) {
+            return $responseQuery[$parameter];
+        }
     }
 }

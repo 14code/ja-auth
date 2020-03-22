@@ -8,3 +8,4 @@ composer.phar
 /.idea/
 /.keys/*.key
 /tests/assets/data/*.json
+/.phpunit.result.cache
