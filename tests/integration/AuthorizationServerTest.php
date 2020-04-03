@@ -193,6 +193,10 @@ class AuthorizationServerTest extends TestCase
         $response = new Response();
         $response = $this->server->completeAuthorizationRequest($authRequest, $response);
 
+        $body = $response->getBody();
+        error_log(print_r($body, true));
+        error_log(print_r($response->getHeaders(), true));
+
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertNotEmpty($response->getHeader('Location'));
@@ -245,9 +249,12 @@ class AuthorizationServerTest extends TestCase
         // ToDo: Where is the refresh token?
 
         $response = $this->server->respondToAccessTokenRequest($request, $response);
+
         $body = $response->getBody();
         $this->assertJson($body);
         $data = json_decode($body);
+        error_log(print_r($data, true));
+
         $this->assertObjectHasAttribute('token_type', $data);
         $this->assertEquals('Bearer', $data->token_type);
         $this->assertObjectHasAttribute('expires_in', $data);
