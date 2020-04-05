@@ -17,6 +17,8 @@ trait RepositoryMockTrait
     protected $users;
     protected $userJsonFile;
     protected $uniqueUser;
+    protected $localSessionFile;
+    protected $localSession;
 
 
     public function getFaker()
@@ -86,6 +88,18 @@ trait RepositoryMockTrait
             'login' => $faker->userName,
             'password' => $faker->password
         ];
+    }
+
+    public function storeLocalSession($sessionData)
+    {
+        $this->localSessionFile = 'tests/assets/data/localSession.json';
+        file_put_contents($this->localSessionFile, json_encode($sessionData));
+    }
+
+    public function loadLocalSession()
+    {
+        $this->localSessionFile = 'tests/assets/data/localSession.json';
+        $this->localSession = json_decode(file_get_contents($this->localSessionFile));
     }
 
 }

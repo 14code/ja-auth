@@ -56,10 +56,10 @@ class AuthorizationServerTest extends TestCase
 
         $keyDir = __DIR__ . '/../../.keys';
 
-        $this->redirectUri = 'notempty';
-
         $privateKey = $keyDir . '/private.key';
         $encryptionKey = file_get_contents($keyDir . '/encryption.key');
+
+        $this->redirectUri = 'notempty';
 
 // Init our repositories
         $encoder = new JsonEncoder();
@@ -177,6 +177,8 @@ class AuthorizationServerTest extends TestCase
     {
         $request = $this->generateAuthorizationRequest();
 
+        error_log(print_r($request->getQueryParams(), true));
+
         $authRequest = $this->server->validateAuthorizationRequest($request);
         $this->assertInstanceOf(AuthorizationRequest::class, $authRequest);
 
@@ -193,8 +195,8 @@ class AuthorizationServerTest extends TestCase
         $response = new Response();
         $response = $this->server->completeAuthorizationRequest($authRequest, $response);
 
-        $body = $response->getBody();
-        error_log(print_r($body, true));
+        //$body = $response->getBody();
+        //error_log(print_r($body, true));
         error_log(print_r($response->getHeaders(), true));
 
 
@@ -260,8 +262,14 @@ class AuthorizationServerTest extends TestCase
         $this->assertObjectHasAttribute('expires_in', $data);
         $this->assertEquals(3600, $data->expires_in);
         $this->assertObjectHasAttribute('access_token', $data);
-        $this->assertNotEmpty($data->access_token);
 
+        $this->validateToken($data->access_token);
+    }
+
+    public function validateToken($token)
+    {
+        $this->assertNotEmpty($token);
+        $this->storeLocalSession((object) ['token' => $token]);
     }
 
 }
