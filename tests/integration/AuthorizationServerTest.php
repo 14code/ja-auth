@@ -170,14 +170,13 @@ class AuthorizationServerTest extends TestCase
         }
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertEquals(302, $response->getStatusCode());
-        //error_log(print_r($response->getHeaders(), true));
     }
 
     public function testAuthorizePartOne()
     {
         $request = $this->generateAuthorizationRequest();
 
-        error_log(print_r($request->getQueryParams(), true));
+        $params = $request->getQueryParams();
 
         $authRequest = $this->server->validateAuthorizationRequest($request);
         $this->assertInstanceOf(AuthorizationRequest::class, $authRequest);
@@ -195,17 +194,12 @@ class AuthorizationServerTest extends TestCase
         $response = new Response();
         $response = $this->server->completeAuthorizationRequest($authRequest, $response);
 
-        //$body = $response->getBody();
-        //error_log(print_r($body, true));
-        error_log(print_r($response->getHeaders(), true));
-
+        $headers = $response->getHeaders();
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertNotEmpty($response->getHeader('Location'));
 
         $location = current($response->getHeader('Location'));
-
-        //error_log($location);
 
         $this->assertEquals($this->state, extractParameterFromUrl('state', $location));
 
@@ -255,7 +249,6 @@ class AuthorizationServerTest extends TestCase
         $body = $response->getBody();
         $this->assertJson($body);
         $data = json_decode($body);
-        error_log(print_r($data, true));
 
         $this->assertObjectHasAttribute('token_type', $data);
         $this->assertEquals('Bearer', $data->token_type);

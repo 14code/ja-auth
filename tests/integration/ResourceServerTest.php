@@ -35,16 +35,16 @@ class ResourceServerTest extends TestCase
         $query = [
         ];
         $serverRequestFactory = new \I4code\JaApi\ServerRequestFactory();
-        $request = $serverRequestFactory->createTestRequest('get', $uri);
-        $request = $request->withQueryParams($query);
-        $request = $request->withHeader('authorization', $token);
+        $serverRequest = $serverRequestFactory->createTestRequest('get', $uri);
+        $serverRequest = $serverRequest->withQueryParams($query);
+        $serverRequest = $serverRequest->withHeader('authorization', $token);
 
-        $response = $this->resourceServer->validateAuthenticatedRequest($request);
+        $validatedRequest = $this->resourceServer->validateAuthenticatedRequest($serverRequest);
 
-        error_log(print_r($response->getHeaders(), true));
-        error_log(print_r($response->getAttributes(), true));
+        $headers = $validatedRequest->getHeaders();
+        $attributes = $validatedRequest->getAttributes();
 
-        $this->assertInstanceOf(\Psr\Http\Message\ServerRequestInterface::class, $response);
+        $this->assertInstanceOf(\Psr\Http\Message\ServerRequestInterface::class, $validatedRequest);
     }
 
 }
