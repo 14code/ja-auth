@@ -110,6 +110,22 @@ trait AuthorizationEnvironment
     }
 
 
+    public function generateLoginRequest($login, $password)
+    {
+        $query = [
+            'login' => $login,
+            'password' => $password
+        ];
+        $uri = '/login';
+
+        $serverRequestFactory = new ServerRequestFactory();
+        $request = $serverRequestFactory->createTestRequest('post', $uri);
+
+        // Use parsed body to mock requests!!!
+        return $request->withParsedBody($query);
+    }
+
+
     public function generateApprovedAuthorizationCode()
     {
         $request = $this->generateAuthorizationRequest();
