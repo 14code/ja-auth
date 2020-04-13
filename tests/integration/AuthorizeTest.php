@@ -14,7 +14,6 @@ use I4code\JaAuth\ScopeEntityFactory;
 use I4code\JaAuth\ScopeRepository;
 use I4code\JaAuth\Session;
 use I4code\JaAuth\TestMocks\AuthorizationEnvironment;
-use I4code\JaAuth\TestMocks\RepositoryMockTrait;
 use I4code\JaAuth\UserEntity;
 use I4code\JaAuth\UserEntityFactory;
 use I4code\JaAuth\UserRepository;
@@ -31,7 +30,7 @@ use function I4code\JaAuth\generateRandomCodeChallenge;
 use function I4code\JaAuth\generateRandomCodeVerifier;
 use function I4code\JaAuth\generateState;
 
-class AuthorizationServerTest extends TestCase
+class AuthorizeTest extends TestCase
 {
     protected $grantType = 'authorization_code';
 
@@ -46,7 +45,7 @@ class AuthorizationServerTest extends TestCase
     protected $userRepository;
     protected $session;
 
-    use RepositoryMockTrait;
+    use \I4code\JaAuth\TestMocks\RepositoryMockTrait;
     use AuthorizationEnvironment;
 
 
@@ -63,7 +62,36 @@ class AuthorizationServerTest extends TestCase
     }
 
 
-    public function testAuthorizePartOne()
+    public function testAuthorizationNoUser()
+    {
+        //$this->expectException(OAuthServerException::class);
+
+        $request = $this->generateAuthorizationRequest();
+
+        $authRequest = $this->server->validateAuthorizationRequest($request);
+        $this->assertInstanceOf(AuthorizationRequest::class, $authRequest);
+
+        $authRequest->setUser($this->session->getUser());
+        $authRequest->setAuthorizationApproved($this->session->userIsApproved());
+
+        $response = null;
+        try {
+            $response = new Response();
+            $this->server->completeAuthorizationRequest($authRequest, $response);
+        }
+        catch (OAuthServerException $e) {
+            $return_to = $request->getUri() . '?' . http_build_query($request->getQueryParams());
+            $redirectUri = '/login?client_id=' . $authRequest->getClient()->getIdentifier()
+                . '&return_to=' . urlencode($return_to);
+            $response = $e->generateHttpResponse($response);
+            $response = $response->withHeader('Location', $redirectUri);
+        }
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertEquals(302, $response->getStatusCode());
+    }
+
+
+    public function testAuthorizeValidUser()
     {
         $request = $this->generateAuthorizationRequest();
 
@@ -97,63 +125,6 @@ class AuthorizationServerTest extends TestCase
         $code = extractParameterFromUrl('code', $location);
         $this->assertNotEmpty($code);
 
-        $this->authorizePartTwo($code);
-    }
-
-    public function authorizePartTwo($code)
-    {
-        $query = [
-            'grant_type' => 'authorization_code',
-            'client_id' => $this->uniqueClientId,
-            'code' => $code,
-            'redirect_uri' => $this->redirectUri, // should be allowed by client!!!I
-            'code_verifier' => $this->codeVerifier,
-            //'code_challenge' => $codeChallenge,
-            //'code_challenge_method' => 'S256',
-            //'scope' => 'user archive',
-            //'state' => $state
-        ];
-        /*
-    grant_type with the value of authorization_code
-    client_id with the client identifier
-    client_secret with the client secret
-    redirect_uri with the same redirect URI the user was redirect back to
-    code with the authorization code from the query string
-*/
-        $uri = '/access_token';
-
-        $serverRequestFactory = new ServerRequestFactory();
-        $request = $serverRequestFactory->createTestRequest('post', $uri);
-        //$body = $request->getBody();
-        //$body->write(json_encode($query));
-        //$request = $request->withBody($body);
-
-        // Use parsed body to mock requests!!!
-        $request = $request->withParsedBody($query);
-
-        $response = new Response();
-
-        // ToDo: Where is the refresh token?
-
-        $response = $this->server->respondToAccessTokenRequest($request, $response);
-
-        $body = $response->getBody();
-        $this->assertJson($body);
-        $data = json_decode($body);
-
-        $this->assertObjectHasAttribute('token_type', $data);
-        $this->assertEquals('Bearer', $data->token_type);
-        $this->assertObjectHasAttribute('expires_in', $data);
-        $this->assertEquals(3600, $data->expires_in);
-        $this->assertObjectHasAttribute('access_token', $data);
-
-        $this->validateToken($data->access_token);
-    }
-
-    public function validateToken($token)
-    {
-        $this->assertNotEmpty($token);
-        $this->storeLocalSession((object) ['token' => $token]);
     }
 
 }
