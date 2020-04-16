@@ -16,15 +16,9 @@ class UserRepository extends Repository implements UserRepositoryInterface
     /**
      * @param string $username
      * @param string $password
-     * @param string $grantType
-     * @param ClientEntityInterface $clientEntity
      * @return UserEntity|UserEntityInterface|null
-     *
-     * ToDo: This method is called to validate a user’s credentials.
-     * - You can use the grant type to determine if the user is permitted to use the grant type.
-     * - You can use the client entity to determine to if the user is permitted to use the client.
      */
-    public function getUserEntityByUserCredentials($login, $password, $grantType, ClientEntityInterface $clientEntity)
+    public function getUserEntityByLoginData($login, $password)
     {
         $users = $this->findAll();
         foreach ($users as $user) {
@@ -35,6 +29,23 @@ class UserRepository extends Repository implements UserRepositoryInterface
                 return $user;
             }
         }
+    }
+
+    /**
+     * @param string $username
+     * @param string $password
+     * @param string $grantType
+     * @param ClientEntityInterface $clientEntity
+     * @return UserEntity|UserEntityInterface|null
+     *
+     * ToDo: This method is called to validate a user’s credentials.
+     * - You can use the grant type to determine if the user is permitted to use the grant type.
+     * - You can use the client entity to determine to if the user is permitted to use the client.
+     */
+    public function getUserEntityByUserCredentials($login, $password, $grantType, ClientEntityInterface $clientEntity)
+    {
+        $user = $this->getUserEntityByLoginData($login, $password);
+        return $user;
     }
 
 }

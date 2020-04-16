@@ -33,6 +33,22 @@ class UserRepositoryTest extends TestCase
         $this->assertCount(count($this->users), $users);
     }
 
+    public function testGetUserEntityByLoginData()
+    {
+        $userData = $this->uniqueUser;
+        $user = $this->repository->getUserEntityByLoginData($userData->login, $userData->password);
+        $this->assertInstanceOf(\I4code\JaAuth\UserEntity::class, $user);
+        $this->assertEquals($userData->id, $user->getIdentifier());
+    }
+
+    public function testGetUserEntityByLoginDataWithEmail()
+    {
+        $userData = $this->uniqueUser;
+        $user = $this->repository->getUserEntityByLoginData($userData->email, $userData->password);
+        $this->assertInstanceOf(\I4code\JaAuth\UserEntity::class, $user);
+        $this->assertEquals($userData->id, $user->getIdentifier());
+    }
+
     public function testGetUserEntityByUserCredentials()
     {
         $userData = $this->uniqueUser;

@@ -48,10 +48,19 @@ class LoginTest extends TestCase
         $this->loginServer = new LoginServer($this->userRepository);
     }
 
+    /**
+     * @throws \I4code\JaAuth\InvalidRequestException
+     * @throws \I4code\JaAuth\LoginServerException
+     * ToDo:
+     * - response should 302 redirect (location defined in query) if login valid
+     *     - query should contain redirect_url
+     * - session handling / which data should response contain?
+     * - how to handle invalid logins
+     */
     public function testLogin()
     {
-        $login = 'user';
-        $password = 'password';
+        $login = $this->uniqueUser->login;
+        $password = $this->uniqueUser->password;
 
         $request = $this->generateLoginRequest($login, $password);
 

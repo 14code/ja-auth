@@ -10,7 +10,10 @@ class LoginServerTest extends TestCase
 
     public function setUp(): void
     {
+        $userMock = $this->createMock(\League\OAuth2\Server\Entities\UserEntityInterface::class);
         $userRepoMock = $this->createMock(\I4code\JaAuth\UserRepository::class);
+        $userRepoMock->method('getUserEntityByLoginData')->willReturn($userMock);
+
         $this->loginServer = new LoginServer($userRepoMock);
     }
 
