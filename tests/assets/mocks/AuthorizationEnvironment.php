@@ -110,11 +110,12 @@ trait AuthorizationEnvironment
     }
 
 
-    public function generateLoginRequest($login, $password)
+    public function generateLoginRequest($login, $password, $redirectUri)
     {
         $query = [
             'login' => $login,
-            'password' => $password
+            'password' => $password,
+            'redirect_uri' => $redirectUri
         ];
         $uri = '/login';
 

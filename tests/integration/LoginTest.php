@@ -5,6 +5,7 @@ namespace integration;
 use I4code\JaApi\JsonEncoder;
 use I4code\JaAuth\JsonGateway;
 use I4code\JaAuth\LoginServer;
+use I4code\JaAuth\LoginServerException;
 use I4code\JaAuth\Session;
 use I4code\JaAuth\TestMocks\AuthorizationEnvironment;
 use I4code\JaAuth\TestMocks\RepositoryMockTrait;
@@ -49,26 +50,43 @@ class LoginTest extends TestCase
     }
 
     /**
-     * @throws \I4code\JaAuth\InvalidRequestException
-     * @throws \I4code\JaAuth\LoginServerException
      * ToDo:
-     * - response should 302 redirect (location defined in query) if login valid
-     *     - query should contain redirect_url
      * - session handling / which data should response contain?
-     * - how to handle invalid logins
      */
     public function testLogin()
     {
         $login = $this->uniqueUser->login;
         $password = $this->uniqueUser->password;
 
-        $request = $this->generateLoginRequest($login, $password);
+        $redirectUri = '/my_redirect_target?client=client' . uniqid();
+
+        $request = $this->generateLoginRequest($login, $password, $redirectUri);
 
         $response = new Response();
         $response = $this->loginServer->respondToLoginRequest($request, $response);
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals(302, $response->getStatusCode());
+        $this->assertTrue($response->hasHeader('Location'));
+        $this->assertEquals([$redirectUri], $response->getHeader('Location'));
+    }
+
+    /**
+     * Invalid login should throw exception
+     */
+    public function testInvalidLogin()
+    {
+        $this->expectException(LoginServerException::class);
+
+        $login = 'invalidUser';
+        $password = 'invalidPass';
+
+        $redirectUri = '/my_redirect_target?client=client' . uniqid();
+
+        $request = $this->generateLoginRequest($login, $password, $redirectUri);
+
+        $response = new Response();
+        $response = $this->loginServer->respondToLoginRequest($request, $response);
     }
 
 }

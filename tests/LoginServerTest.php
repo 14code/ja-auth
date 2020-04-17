@@ -24,9 +24,12 @@ class LoginServerTest extends TestCase
 
     public function testRespondToLoginRequest()
     {
+        $redirectUri = '/my_redirect_target?client=client' . uniqid();
+
         $queryData = [
             'login' => 'user',
-            'password' => 'sfsdfd'
+            'password' => 'sfsdfd',
+            'redirect_uri' => $redirectUri
         ];
 
         $requestMock = $this->createMock(\Psr\Http\Message\ServerRequestInterface::class);
@@ -35,6 +38,7 @@ class LoginServerTest extends TestCase
 
         $responseMock = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
         $responseMock->method('withStatus')->willReturn($responseMock);
+        $responseMock->method('withHeader')->willReturn($responseMock);
 
         $response = $this->loginServer->respondToLoginRequest($requestMock, $responseMock);
         $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $response);
