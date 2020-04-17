@@ -52,6 +52,8 @@ class LoginTest extends TestCase
     /**
      * ToDo:
      * - session handling / which data should response contain?
+     * - store user id in session
+     * - test to receive user id via session
      */
     public function testLogin()
     {
