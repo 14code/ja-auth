@@ -1,8 +1,5 @@
 <?php
-
-
 namespace I4code\JaAuth;
-
 
 use League\OAuth2\Server\Entities\UserEntityInterface;
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
@@ -41,9 +38,21 @@ class LoginServer
             throw LoginServerException::invalidCredentials();
         }
 
+        session_start();
+        $_SESSION['userId'] = $user->getIdentifier();
+        $sessionId = session_id();
+        $sessionName = 'JaLoginSession';
+
+        $sessionResponse = new SessionCookieResponse();
+        $sessionResponse->setSessionId($sessionId);
+        $sessionResponse->setSessionName($sessionName);
+        $response = $sessionResponse->generateHttpResponse($response);
+
         $redirectResponse = new RedirectResponse();
         $redirectResponse->setRedirectUri($requestData['redirect_uri']);
-        return $redirectResponse->generateHttpResponse($response);
+        $response = $redirectResponse->generateHttpResponse($response);
+
+        return $response;
     }
 
 }

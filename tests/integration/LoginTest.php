@@ -1,6 +1,8 @@
 <?php
-
-namespace integration;
+ini_set('session.use_trans_sid', false);
+ini_set('session.use_cookies', false);
+ini_set('session.use_only_cookies', true);
+ini_set('session.cache_limiter', '');
 
 use I4code\JaApi\JsonEncoder;
 use I4code\JaAuth\JsonGateway;
@@ -54,6 +56,9 @@ class LoginTest extends TestCase
      * - session handling / which data should response contain?
      * - store user id in session
      * - test to receive user id via session
+     * - extract session cookie from response
+     * - add session cookie to request
+     * - verify request with session cookie
      */
     public function testLogin()
     {
@@ -71,6 +76,8 @@ class LoginTest extends TestCase
         $this->assertEquals(302, $response->getStatusCode());
         $this->assertTrue($response->hasHeader('Location'));
         $this->assertEquals([$redirectUri], $response->getHeader('Location'));
+        $this->assertTrue($response->hasHeader('Set-Cookie'));
+        $this->assertEquals([$redirectUri], $response->getHeader('Set-Cookie'));
     }
 
     /**

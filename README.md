@@ -31,3 +31,9 @@ docker run -it --rm -v "$PWD":/app -w /app php:7.3-cli php -r 'echo base64_encod
 docker run -it --rm -v "$PWD":/app -v "$HOME/.ssh":/root/.ssh -w /app composer update
 
 docker run -it --rm -v "$PWD":/app -w /app php:7.2-cli vendor/bin/phpunit tests
+
+
+### Inspirations
+http://paul-m-jones.com/post/2016/04/12/psr-7-and-session-cookies/
+https://github.com/relayphp/Relay.Middleware/blob/1.x/src/SessionHeadersHandler.php
+https://www.php.net/manual/de/class.sessionhandlerinterface.php
