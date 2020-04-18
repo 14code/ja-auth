@@ -14,6 +14,20 @@ class UserRepository extends Repository implements UserRepositoryInterface
     use EntityTrait;
 
     /**
+     * @param string $userId
+     * @return UserEntity|UserEntityInterface|null
+     */
+    public function getUserEntityByIdentifier($userId)
+    {
+        $users = $this->findAll();
+        foreach ($users as $user) {
+            if (($userId == $user->getIdentifier())) {
+                return $user;
+            }
+        }
+    }
+
+    /**
      * @param string $username
      * @param string $password
      * @return UserEntity|UserEntityInterface|null

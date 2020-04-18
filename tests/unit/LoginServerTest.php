@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 class LoginServerTest extends TestCase
 {
+    use \I4code\JaAuth\TestMocks\AuthorizationEnvironment;
+
     protected $loginServer;
 
     public function setUp(): void
@@ -24,6 +26,8 @@ class LoginServerTest extends TestCase
 
     public function testRespondToLoginRequest()
     {
+        $this->destroySession();
+
         $redirectUri = '/my_redirect_target?client=client' . uniqid();
 
         $queryData = [
@@ -39,6 +43,7 @@ class LoginServerTest extends TestCase
         $responseMock = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
         $responseMock->method('withStatus')->willReturn($responseMock);
         $responseMock->method('withHeader')->willReturn($responseMock);
+        $responseMock->method('withAddedHeader')->willReturn($responseMock);
 
         $response = $this->loginServer->respondToLoginRequest($requestMock, $responseMock);
         $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $response);

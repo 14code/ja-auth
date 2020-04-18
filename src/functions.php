@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace I4code\JaAuth;
 
+use Psr\Http\Message\ServerRequestInterface;
+
 function generateRandomCodeChallenge($verifier)
 {
     $challengeBytes = hash("sha256", $verifier, true);
@@ -33,5 +35,13 @@ function extractParameterFromUrl($parameter, $url)
         if (isset($responseQuery[$parameter])) {
             return $responseQuery[$parameter];
         }
+    }
+}
+
+function extractCookieValueFromRequest($cookieName, ServerRequestInterface $request)
+{
+    $cookies = $request->getCookieParams();
+    if (isset($cookies[$cookieName])) {
+        return $cookies[$cookieName];
     }
 }

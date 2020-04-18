@@ -4,6 +4,7 @@
 namespace I4code\JaAuth;
 
 
+use http\Exception\RuntimeException;
 use Psr\Http\Message\ResponseInterface;
 
 class SessionCookieResponse
@@ -80,4 +81,24 @@ class SessionCookieResponse
 
         return $response->withAddedHeader('Set-Cookie', $cookie);
     }
+
+    /**
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     */
+    public function extractSessionIdFromResponse(ResponseInterface $response)
+    {
+        $cookieHeaders = $response->getHeader('Set-Cookie');
+        foreach ($cookieHeaders as $cookieRow) {
+            $cookieParts = array_filter(array_map('trim', explode(';', $cookieRow)));
+            if (empty($cookieParts) || !strpos($cookieParts[0], '=')) {
+                throw new RuntimeException('Invalid cookie in server response.');
+            }
+            list($cookieName, $cookieValue) = explode('=', $cookieParts[0]);
+            if ($cookieName == $this->getSessionName()) {
+                return $cookieValue;
+            }
+        }
+    }
+
 }

@@ -28,6 +28,21 @@ use function I4code\JaAuth\generateState;
 trait AuthorizationEnvironment
 {
 
+    public function destroySession()
+    {
+        if (!empty(session_id())) {
+            session_destroy();
+        }
+    }
+
+    public function closeSession()
+    {
+        if (isset($_SESSION)) {  // if there is already a session running
+            session_write_close(); // save and close it
+            unset($_SESSION);
+        }
+    }
+
     public function setUpAuthorizationServer()
     {
         $this->createClientJsonRepository();
@@ -124,6 +139,19 @@ trait AuthorizationEnvironment
 
         // Use parsed body to mock requests!!!
         return $request->withParsedBody($query);
+    }
+
+
+    public function generateSessionLoginRequest($sessionName, $sessionId)
+    {
+        $uri = '/login';
+
+        $serverRequestFactory = new ServerRequestFactory();
+        $request = $serverRequestFactory->createTestRequest('get', $uri);
+
+        $request = $request->withCookieParams([$sessionName => $sessionId]);
+
+        return $request;
     }
 
 

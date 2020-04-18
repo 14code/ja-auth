@@ -22,9 +22,23 @@ class LoginServerException extends OAuthServerException
     {
         $errorMessage = 'Invalid request method ' . $serverRequest->getMethod() . ', should be ' . $requiredMethod . '.';
         $exception = new static($errorMessage, 4, 'invalid_method', 400);
-
         $exception->setServerRequest($serverRequest);
+        return $exception;
+    }
 
+    /**
+     * Invalid request method error.
+     *
+     * @param string $requiredMethod
+     * @param ServerRequestInterface $serverRequest
+     *
+     * @return static
+     */
+    public static function invalidUser(ServerRequestInterface $serverRequest)
+    {
+        $errorMessage = 'Unknown user selected.';
+        $exception = new static($errorMessage, 4, 'invalid_method', 401);
+        $exception->setServerRequest($serverRequest);
         return $exception;
     }
 

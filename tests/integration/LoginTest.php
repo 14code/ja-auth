@@ -62,6 +62,8 @@ class LoginTest extends TestCase
      */
     public function testLogin()
     {
+        $this->destroySession();
+
         $login = $this->uniqueUser->login;
         $password = $this->uniqueUser->password;
 
@@ -77,7 +79,7 @@ class LoginTest extends TestCase
         $this->assertTrue($response->hasHeader('Location'));
         $this->assertEquals([$redirectUri], $response->getHeader('Location'));
         $this->assertTrue($response->hasHeader('Set-Cookie'));
-        $this->assertEquals([$redirectUri], $response->getHeader('Set-Cookie'));
+        $this->assertNotEmpty($response->getHeader('Set-Cookie'));
     }
 
     /**
@@ -85,6 +87,8 @@ class LoginTest extends TestCase
      */
     public function testInvalidLogin()
     {
+        $this->destroySession();
+
         $this->expectException(LoginServerException::class);
 
         $login = 'invalidUser';
@@ -96,6 +100,43 @@ class LoginTest extends TestCase
 
         $response = new Response();
         $response = $this->loginServer->respondToLoginRequest($request, $response);
+    }
+
+
+    public function testLoginWithSession()
+    {
+        $this->destroySession();
+
+        $login = $this->uniqueUser->login;
+        $password = $this->uniqueUser->password;
+
+        $redirectUri = '/my_redirect_target?client=client' . uniqid();
+
+        $request = $this->generateLoginRequest($login, $password, $redirectUri);
+
+        $response = new Response();
+        $response = $this->loginServer->respondToLoginRequest($request, $response);
+
+        $sessionName = 'JaLoginSession';
+        $sessionResponse = new \I4code\JaAuth\SessionCookieResponse();
+        $sessionResponse->setSessionName($sessionName);
+        $sessionId = $sessionResponse->extractSessionIdFromResponse($response);
+
+        $this->assertNotEmpty($sessionId);
+
+        $this->closeSession();
+
+        $request = $this->generateSessionLoginRequest($sessionName, $sessionId);
+
+        $response = new Response();
+        $response = $this->loginServer->respondToLoginRequest($request, $response);
+
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertEquals(302, $response->getStatusCode());
+        $this->assertTrue($response->hasHeader('Location'));
+        $this->assertEquals(['/'], $response->getHeader('Location'));
+        $this->assertTrue($response->hasHeader('Set-Cookie'));
+        $this->assertNotEmpty($response->getHeader('Set-Cookie'));
     }
 
 }
