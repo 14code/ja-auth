@@ -53,12 +53,12 @@ class LoginTest extends TestCase
 
     /**
      * ToDo:
-     * - session handling / which data should response contain?
-     * - store user id in session
-     * - test to receive user id via session
-     * - extract session cookie from response
-     * - add session cookie to request
-     * - verify request with session cookie
+     *  - session handling / which data should response contain?
+     *  - store user id in session
+     *  - test to receive user id via session
+     *  - extract session cookie from response
+     *  - add session cookie to request
+     *  - verify request with session cookie
      */
     public function testLogin()
     {

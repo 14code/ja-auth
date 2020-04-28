@@ -8,3 +8,6 @@ use League\OAuth2\Server\Grant\AuthCodeGrant;
 set_include_path("..");
 
 include 'vendor/autoload.php';
+
+echo 'eins';
+echo 'zweit';
