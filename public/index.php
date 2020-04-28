@@ -9,5 +9,4 @@ set_include_path("..");
 
 include 'vendor/autoload.php';
 
-echo 'eins';
-echo 'zweit';
+echo '{}';
