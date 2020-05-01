@@ -25,18 +25,43 @@ class ResourceServerTest extends TestCase
         );
     }
 
-    public function testTokenVerify()
+    public function testServerInstance()
     {
         $this->assertInstanceOf(\League\OAuth2\Server\ResourceServer::class, $this->resourceServer);
+    }
 
+
+    public function testRequestWithoutToken()
+    {
+        $this->expectException(\League\OAuth2\Server\Exception\OAuthServerException::class);
+        $uri = '/data';
+        $serverRequestFactory = new \I4code\JaApi\ServerRequestFactory();
+        $serverRequest = $serverRequestFactory->createTestRequest('get', $uri);
+        $this->resourceServer->validateAuthenticatedRequest($serverRequest);
+    }
+
+
+    public function testRequestInvalidToken()
+    {
+        $this->expectException(\League\OAuth2\Server\Exception\OAuthServerException::class);
+        $uri = '/data';
+        $token = uniqid();
+
+        $serverRequestFactory = new \I4code\JaApi\ServerRequestFactory();
+        $serverRequest = $serverRequestFactory->createTestRequest('get', $uri);
+        $serverRequest = $serverRequest->withHeader('authorization', $token);
+
+        $this->resourceServer->validateAuthenticatedRequest($serverRequest);
+    }
+
+
+    public function testTokenVerify()
+    {
         $uri = '/token';
         $token = $this->localSession->token;
 
-        $query = [
-        ];
         $serverRequestFactory = new \I4code\JaApi\ServerRequestFactory();
         $serverRequest = $serverRequestFactory->createTestRequest('get', $uri);
-        $serverRequest = $serverRequest->withQueryParams($query);
         $serverRequest = $serverRequest->withHeader('authorization', $token);
 
         $validatedRequest = $this->resourceServer->validateAuthenticatedRequest($serverRequest);
