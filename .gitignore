@@ -9,3 +9,4 @@ composer.phar
 /.keys/*.key
 /tests/assets/data/*.json
 /.phpunit.result.cache
+/doc/
