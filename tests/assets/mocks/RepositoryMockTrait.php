@@ -11,6 +11,7 @@ trait RepositoryMockTrait
     protected $clients;
     protected $clientJsonFile;
     protected $uniqueClientId;
+    protected $confidentialClientId;
     protected $scopes;
     protected $scopeJsonFile;
     protected $uniqueScopeId;
@@ -33,19 +34,28 @@ trait RepositoryMockTrait
     public function createClientJsonRepository(): void
     {
         $this->uniqueClientId = uniqid('client');
+        $this->confidentialClientId = uniqid('client');
         $this->clientJsonFile = 'tests/assets/data/clients.json';
-        $this->clients = [
-            (object) [
-                'id' => $this->uniqueClientId
-            ],
-            (object) [
-                'id' => uniqid('client')
-            ],
-            (object) [
-                'id' => uniqid('client')
-            ]
-        ];
+        $client = $this->createClientDataObject();
+        $client->id = $this->uniqueClientId;
+        $this->clients[] = $client;
+        $client = $this->createClientDataObject();
+        $this->clients[] = $client;
+        $client = $this->createClientDataObject();
+        $client->id = $this->confidentialClientId;
+        $client->isConfidential = true;
+        $this->clients[] = $client;
         file_put_contents($this->clientJsonFile, json_encode($this->clients));
+    }
+
+
+    public function createClientDataObject(): object
+    {
+        $faker = $this->getFaker();
+        return (object) [
+            'id' => uniqid('client'),
+            'name' => $faker->domainName
+        ];
     }
 
     public function createScopeJsonRepository(): void

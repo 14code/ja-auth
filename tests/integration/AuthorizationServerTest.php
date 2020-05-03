@@ -65,7 +65,7 @@ class AuthorizationServerTest extends TestCase
 
     public function testAuthorizePartOne()
     {
-        $request = $this->generateAuthorizationRequest();
+        $request = $this->generateAuthorizeRequest();
 
         $params = $request->getQueryParams();
 

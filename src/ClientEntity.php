@@ -12,9 +12,13 @@ class ClientEntity implements ClientEntityInterface
     use EntityTrait;
     use ClientTrait;
 
-    public function __construct()
+    /**
+     * ClientEntity constructor.
+     */
+    public function __construct($name = '', $redirectUri = null, $isConfidential = false)
     {
-        $this->redirectUri = 'notempty';
+        $this->name = $name;
+        $this->redirectUri = $redirectUri;
+        $this->isConfidential = $isConfidential;
     }
-
 }

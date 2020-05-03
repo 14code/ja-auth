@@ -66,7 +66,7 @@ class AuthorizeTest extends TestCase
     {
         //$this->expectException(OAuthServerException::class);
 
-        $request = $this->generateAuthorizationRequest();
+        $request = $this->generateAuthorizeRequest();
 
         $authRequest = $this->server->validateAuthorizationRequest($request);
         $this->assertInstanceOf(AuthorizationRequest::class, $authRequest);
@@ -93,7 +93,7 @@ class AuthorizeTest extends TestCase
 
     public function testAuthorizeValidUser()
     {
-        $request = $this->generateAuthorizationRequest();
+        $request = $this->generateAuthorizeRequest();
 
         $params = $request->getQueryParams();
 
@@ -127,4 +127,32 @@ class AuthorizeTest extends TestCase
 
     }
 
+    /**
+     * ToDo: Client should be confidential
+     */
+    public function testAuthorizeNoPkce()
+    {
+        $request = $this->generateAuthorizeRequestNoPkce();
+
+        $params = $request->getQueryParams();
+
+        $authRequest = $this->server->validateAuthorizationRequest($request);
+        $this->assertInstanceOf(AuthorizationRequest::class, $authRequest);
+
+        $response = new Response();
+        $response = $this->server->completeAuthorizationRequest($authRequest, $response);
+
+        $headers = $response->getHeaders();
+
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertNotEmpty($response->getHeader('Location'));
+
+        $location = current($response->getHeader('Location'));
+
+        $this->assertEquals($this->state, extractParameterFromUrl('state', $location));
+
+        $code = extractParameterFromUrl('code', $location);
+        $this->assertNotEmpty($code);
+
+    }
 }

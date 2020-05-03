@@ -10,7 +10,21 @@ class ClientEntityFactory extends AbstractFactory
 
     public function createFromObject(object $data)
     {
-        $client = new ClientEntity();
+        $name = '';
+        if (isset($data->name)) {
+            $name = $data->name;
+        }
+        $redirectUri = null;
+        if (isset($data->redirectUri)) {
+            $redirectUri = $data->redirectUri;
+        }
+
+        $isConfidential = false;
+        if (isset($data->isConfidential)) {
+            $isConfidential = $data->isConfidential;
+        }
+
+        $client = new ClientEntity($name, $redirectUri, $isConfidential);
         $client->setIdentifier($data->id);
         return $client;
     }

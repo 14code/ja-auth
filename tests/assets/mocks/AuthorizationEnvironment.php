@@ -104,7 +104,7 @@ trait AuthorizationEnvironment
     }
 
 
-    public function generateAuthorizationRequest()
+    public function generateAuthorizeRequest()
     {
         $query = [
             'response_type' => 'code',
@@ -119,11 +119,30 @@ trait AuthorizationEnvironment
 
         $serverRequestFactory = new ServerRequestFactory();
         $request = $serverRequestFactory->createTestRequest('get', $uri);
+
         $request = $request->withQueryParams($query);
 
         return $request;
     }
 
+    public function generateAuthorizeRequestNoPkce()
+    {
+        $query = [
+            'response_type' => 'code',
+            'client_id' => $this->confidentialClientId,
+            'redirect_uri' => $this->redirectUri, // should be allowed by client!!!I
+            'scope' => 'user archive',
+            'state' => $this->state
+        ];
+        $uri = '/authorize';
+
+        $serverRequestFactory = new ServerRequestFactory();
+        $request = $serverRequestFactory->createTestRequest('get', $uri);
+
+        $request = $request->withQueryParams($query);
+
+        return $request;
+    }
 
     public function generateLoginRequest($login, $password, $redirectUri)
     {
@@ -157,7 +176,7 @@ trait AuthorizationEnvironment
 
     public function generateApprovedAuthorizationCode()
     {
-        $request = $this->generateAuthorizationRequest();
+        $request = $this->generateAuthorizeRequest();
 
         $params = $request->getQueryParams();
 
